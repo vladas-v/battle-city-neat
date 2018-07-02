@@ -17,7 +17,7 @@ This is a work in progress. I am currently training the genomes for a few months
 * Modified the checkpointing class to save checkpoints at the start of the generation instead of the end, in which case when loading the checkpoint the generation is starting from scratch. Issue opened: https://github.com/CodeReclaimers/neat-python/issues/132.
 
 ## ToDo
-* Create a direct Lua-FCEUX API. This way it will be possible to read the the emulator RAM memory directly. Reading the values of the game, the location of the objects, as well as the ability to advance the emulation frame by frame will maximize the precision, and remove all the ambiguity from the currently sampled down screenshot of the game. Currently have a working Lua-to-Python client-host socket connection. The aim is to have a FCEUX(emulation) <> Lua(RAM reading and emulation control) <> Python(neuroevolution) API.
+* Create a direct Lua-FCEUX API. This way it will be possible to read the emulator RAM memory directly. Reading the values of the game, the location of the objects, as well as the ability to advance the emulation frame by frame will maximize the precision, and remove all the ambiguity from the currently sampled down screenshot of the game. Currently have a working Lua-to-Python client-host socket connection. The aim is to have a FCEUX(emulation) <> Lua(RAM reading and emulation control) <> Python(neuroevolution) API.
 
 
 ## Progress
