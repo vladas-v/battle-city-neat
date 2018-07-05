@@ -38,9 +38,9 @@ The evolution now is a lot faster and more configurations can be tested in a sho
 
 ## ToDo
 * Test different activation functions.
-Currently the neuroevolution runs on the 'relu' activation function. Which usually lets me take the most confident action, but only one button press at a time. The 'sigmoid' function can prove useful - it would let the agent press more than one button at once. For this I will need to change the action processing -> sending to lua -> receiving and activating at lua.
+Currently the neuroevolution runs on the 'relu' activation function. Which usually lets the agent take the most confident action, but only one button press at a time. The 'sigmoid' function can prove useful - it would let the agent press more than one button at once. For this I will need to change the action processing -> sending to lua -> receiving and activating at lua.
 * Test different population sizes and species compatibility thresholds.
-This would result in different specieism and/or with smaller population a faster generation turn-around, which means more mutations.
+This would result in differently sized specieism and/or with smaller population a faster generation turn-around, which means more mutations.
 * Test different mutation rates and starting hidden neuron numbers.
 Higher mutation rates would over time speed up the growth of connections/neurons. The other possibility is to kickstart the neuron networks with more hidden neurons from the start.
 * Implement a plotting function, which can plot the species' stagnation and fitness levels. Also this could be sent with the status updates through email.
