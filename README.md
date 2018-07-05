@@ -16,9 +16,32 @@ This is a work in progress. I am currently training the genomes for a few months
 * Modified the reporting class to send the status and statistics of each generation through e-mail.
 * Modified the checkpointing class to save checkpoints at the start of the generation instead of the end, in which case when loading the checkpoint the generation is starting from scratch. Issue opened: https://github.com/CodeReclaimers/neat-python/issues/132.
 
-## ToDo
-* Create a direct Lua-FCEUX API. This way it will be possible to read the emulator RAM memory directly. Reading the values of the game, the location of the objects, as well as the ability to advance the emulation frame by frame will maximize the precision, and remove all the ambiguity from the currently sampled down screenshot of the game. Currently have a working Lua-to-Python client-host socket connection. The aim is to have a FCEUX(emulation) <> Lua(RAM reading and emulation control) <> Python(neuroevolution) API.
-
-
 ## Progress
 At the moment the genomes are being trained with a screenshot to input method. The average score of all the genomes are quite low, but occasionally there are breakthroughs where an agent is almost beating the first level.
+
+## ToDo
+* Create a direct Python-Lua-FCEUX interface. This way it will be possible to read the emulator RAM memory directly. Reading the values of the game, the location of the objects, as well as the ability to advance the emulation frame by frame will maximize the precision, and remove all the ambiguity from the currently sampled down screenshot of the game. Currently have a working Lua-to-Python client-host socket connection. The aim is to have a FCEUX(emulation) <> Lua(RAM reading and emulation control) <> Python(neuroevolution) interface.
+
+
+# Update 07.05
+
+## Changes:
+* Implemented the FCEUX <> Lua <-socket-> Python interface. Therefore:
+  * Complete direct control over the emulation;
+  * The emulation is two/three times as fast as before;
+  * No more dependency on screen capture, this means the neuron network receives 100% accurate data input of the game, the      location of objects and statuses. Also the emulation/neuroevolution can be left to run in the background without interruptions.
+* Changed the fitness function;
+* Changed the running output;
+
+## Progress
+The evolution now is a lot faster and more configurations can be tested in a shorter amount of time. Will update if new breakthroughs happen.
+
+## ToDo
+* Test different activation functions.
+Currently the neuroevolution runs on the 'relu' activation function. Which usually lets me take the most confident action, but only one button press at a time. The 'sigmoid' function can prove useful - it would let the agent press more than one button at once. For this I will need to change the action processing -> sending to lua -> receiving and activating at lua.
+* Test different population sizes and species compatibility thresholds.
+This would result in different specieism and/or with smaller population a faster generation turn-around, which means more mutations.
+* Test different mutation rates and starting hidden neuron numbers.
+Higher mutation rates would over time speed up the growth of connections/neurons. The other possibility is to kickstart the neuron networks with more hidden neurons from the start.
+* Implement a plotting function, which can plot the species' stagnation and fitness levels. Also this could be sent with the status updates through email.
+* Implement a graphical view of the neurons firing on the game screen?
