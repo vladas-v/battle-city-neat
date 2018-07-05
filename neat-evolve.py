@@ -8,7 +8,10 @@ import visualize
 import socket
 from gmail import report_gmail
 
-
+"""
+The following basic functions are to send the command
+to the lua script through the socket connection. 
+"""
 def shoot():
     conn.send("A\n".encode())
 
@@ -34,6 +37,15 @@ def nothing():
 
 
 def get_fitness(score, frames, eagle_dead):
+    """
+    Function to calculate the fitness for each genome.
+    :param score: end game score, received from RAM values.
+    :param frames: how long the game took. Tracking time in seconds is not adequate
+    because the speed at which the emulation runs is not constant. It usually depends
+    on the system, and whether there are other applications running which use resources.
+    :param eagle_dead: a string received from a RAM value, whether the base is destroyed.
+    :return: fitness number.
+    """
     frames = frames / 100
     fitness = int(((frames * score) / 100) + frames)
     if eagle_dead == "false":
@@ -49,20 +61,32 @@ def get_fitness(score, frames, eagle_dead):
 
 
 def eval_genome(genome, config):
+    """
+    The function to run and evaluate each genome.
+    This is the main function that is used to receive inputs,
+    calculate the activation, and output the action.
+    :param genome: genome object
+    :param config: config file object
+    :return: fitness number
+    """
     net = neat.nn.FeedForwardNetwork.create(genome, config)
     # net = neat.nn.RecurrentNetwork.create(genome, config)
 
     while True:
         received = conn.recv(4096).decode().split(",")
-        if received[0] != "end":
+        if received[0] != "end":    # check if the received message means the end of the game for the genome.
             inputs = np.array(received).astype(int)
         else:
+            """
+            With the end message there are also end game values for fitness calculation.
+            """
             frames = int(received[1])
             score = int(received[2])
             eagle_dead = received[3]
             break
 
-        inputs = np.true_divide(inputs, 255)
+        inputs = np.true_divide(inputs, 255)    # normalizing the inputs to a [0, 1] inverval so the neuron network
+                                                # calculates faster
         action = net.activate(inputs)
         action_array = np.array(action)
         ind = np.unravel_index(np.argmax(action_array, axis=None), action_array.shape)[0]
@@ -86,6 +110,11 @@ def eval_genome(genome, config):
 
 
 def eval_genomes(genomes, config):
+    """
+    Function to iterate through all genomes in a generation and evaluate them.
+    :param genomes: all genomes object.
+    :param config: config file object.
+    """
     genome_num = 0
     for genome_id, genome in genomes:
         genome_num += 1

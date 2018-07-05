@@ -6,11 +6,21 @@ local tcp = assert(socket.tcp())
 
 tcp:connect(host, port)
 
---tcp:send("hello\n")
---line = tcp:receive()
+-----------------------------------------------
+-- RAM addresses.
+-----------------------------------------------
+
+-----------------------------------------------
+-- Player tank X, Y coordinates.
 
 Tx = 0x90
 Ty = 0x98
+-----------------------------------------------
+
+-----------------------------------------------
+-- Enemy tanks X, Y coordinates.
+-- There can only be max 4 enemy tanks
+-- at one time.
 
 E1x = 0x92
 E2x = 0x93
@@ -21,6 +31,12 @@ E1y = 0x9A
 E2y = 0x9B
 E3y = 0x9C
 E4y = 0x9D
+-----------------------------------------------
+
+-----------------------------------------------
+-- Enemy bullets X, Y coordinates.
+-- Each enemy tank can fire one bullet
+-- at one time until it hits something.
 
 B1x = 0xBA
 B2x = 0xBB
@@ -31,6 +47,16 @@ B1y = 0xC4
 B2y = 0xC5
 B3y = 0xC6
 B4y = 0xC7
+-----------------------------------------------
+
+-----------------------------------------------
+-- Misc RAM values:
+-- Player lives left.
+-- Powerup position.
+-- Powerup status.
+-- Player tank state.
+-- Player shield state.
+-- Base status.
 
 Lives = 0x51
 Power_pos = 0xC0
@@ -39,7 +65,11 @@ Tank_state = 0xA8
 Shield = 0x89
 Eagle = 0x76E
 
---score addr:
+-----------------------------------------------
+
+-----------------------------------------------
+-- Score numerals:
+
 Ones = 0x1B
 Tens = 0x1A
 Hundreds = 0x19
@@ -48,8 +78,10 @@ Tenthousands = 0x17
 Hundredthousands = 0x16
 Millions = 0x15
 
-function get_score()
+-----------------------------------------------
 
+function get_score()
+    -- Score numeral concatanation.
     local Ones = memory.readbyte(Ones)
     local Tens = memory.readbyte(Tens)
     local Hundreds = memory.readbyte(Hundreds)
@@ -64,12 +96,13 @@ end
 
 emu.speedmode("maximum")
 save = savestate.object('10')
-while (true) do
+while (true) do -- outer loop for continuous running
     savestate.load(save)
     local frames = 0
     local eagle_dead = "false"
-    while (true) do
-        --local t = os.clock()
+    while (true) do -- inner loop for each genome
+
+        -- checking if the base is destroyed or no lives left:
         if memory.readbyte(Eagle) ~= 201 or memory.readbyte(Lives) == 0 then do
             local score = get_score()
             if memory.readbyte(Eagle) ~= 201 then do eagle_dead = "true" end end
@@ -77,6 +110,8 @@ while (true) do
             break
             end
         end
+
+        -- control table with all buttons set to not pressed
         local control_table = {
             A=false,
             up=false,
@@ -88,6 +123,9 @@ while (true) do
             start=false
         }
         local list = {}
+
+        -- a loop to get all the RAM values for each brick object.
+        -- overall there are 26 * 26 = 676 values
         for adr_first = 0x442, 0x77b, 0x20 do
             local adr_last = adr_first + 0x19
             for adr = adr_first, adr_last do
@@ -95,6 +133,7 @@ while (true) do
             end
         end
 
+        -- reading all the other RAM values
         table.insert(list, memory.readbyte(Tx))
         table.insert(list, memory.readbyte(Ty))
 
@@ -124,15 +163,17 @@ while (true) do
         table.insert(list, memory.readbyte(Tank_state))
         table.insert(list, memory.readbyte(Shield))
 
-        tcp:send(table.concat(list, ","))
-        --tcp:close()
-        --os.exit()
+        tcp:send(table.concat(list, ",")) -- concatanating everything into a string and sending it through the socket
+                                          -- to the python evaluation script.
+
+        -- now the lua script waits for the receiving message back on what command to do.
+        -- the command is then activated by changing the button in the control_table to 'true'
         local command = tcp:receive()
         if command ~= "nothing" and command ~= nil then do control_table[command] = "true" end end
         joypad.set(1, control_table)
-        emu.frameadvance()
+
+        emu.frameadvance() -- advance the emulation by one frame
         frames = frames + 1
-        --print(string.format("elapsed time: %.2f\n", os.clock() - t))
     end
 end
 tcp:close()
