@@ -9,8 +9,9 @@ import time
 
 from neat.math_util import mean, stdev
 from neat.six_util import itervalues, iterkeys
-from gmail import report_gmail
-
+from gmail import report
+from plot import plot_species_stagnation, plot_fitness_over_gen
+import os
 # TODO: Add a curses-based reporter.
 
 
@@ -100,7 +101,15 @@ class StdOutReporter(BaseReporter):
     def start_generation(self, generation, config, population, species_set):
         self.generation = generation
         print('\n ****** Running generation {0} ****** \n'.format(generation))
-        report_gmail('\n ****** Running generation {0} ****** \n'.format(generation))
+        report('\n ****** Running generation {0} ****** \n'.format(generation))
+
+        if not os.path.isfile('fitplot') or generation == 0:
+            with open('fitplot', 'w') as f:
+                pass
+
+        with open('fitplot', 'a') as f:
+            f.write('{},'.format(generation))
+
         self.generation_start_time = time.time()
 
     def end_generation(self, config, population, species_set):
@@ -144,7 +153,8 @@ class StdOutReporter(BaseReporter):
             print("Generation time: {0:.3f} sec".format(elapsed))
             body.append("Generation time: {0:.3f} sec\n".format(elapsed))
         if body:
-            report_gmail(body)
+            img = plot_species_stagnation(body, 'species_plot.png')
+            report(body, img)
 
     def post_evaluate(self, config, population, species, best_genome):
         # pylint: disable=no-self-use
@@ -153,6 +163,8 @@ class StdOutReporter(BaseReporter):
         fit_mean = mean(fitnesses)
         fit_std = stdev(fitnesses)
         best_species_id = species.get_species_id(best_genome.key)
+        with open('fitplot', 'a') as f:
+            f.write('{},{},{}\n'.format(fit_mean, fit_std, best_genome.fitness))
         print('Population\'s average fitness: {0:3.5f} stdev: {1:3.5f}'.format(fit_mean, fit_std))
         print(
             'Best fitness: {0:3.5f} - size: {1!r} - species {2} - id {3}'.format(best_genome.fitness,
@@ -166,7 +178,8 @@ class StdOutReporter(BaseReporter):
                                                                                  best_species_id,
                                                                                  best_genome.key))
         if body:
-            report_gmail(body)
+            img = plot_fitness_over_gen('fitplot', 'fitplot.png')
+            report(body, img)
 
     def complete_extinction(self):
         self.num_extinctions += 1
@@ -179,7 +192,7 @@ class StdOutReporter(BaseReporter):
     def species_stagnant(self, sid, species):
         if self.show_species_detail:
             print("\nSpecies {0} with {1} members is stagnated: removing it".format(sid, len(species.members)))
-            report_gmail("\nSpecies {0} with {1} members is stagnated: removing it".format(sid, len(species.members)))
+            report("\nSpecies {0} with {1} members is stagnated: removing it".format(sid, len(species.members)))
 
     def info(self, msg):
         print(msg)

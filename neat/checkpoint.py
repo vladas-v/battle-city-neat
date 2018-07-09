@@ -92,5 +92,19 @@ class Checkpointer(BaseReporter):
         """Resumes the simulation from a previous saved point."""
         with gzip.open(filename) as f:
             generation, config, population, species_set, rndstate = pickle.load(f)
+
+            # Truncates the fitplot data file to the current generation:
+            rebuilt = []
+            with open('fitplot', 'r') as f:
+                lines = f.readlines()
+            for line in lines:
+                if line.startswith(str(generation)):
+                    break
+                else:
+                    rebuilt.append(line)
+            if rebuilt:
+                with open('fitplot', 'w') as f:
+                    f.writelines(rebuilt)
+
             random.setstate(rndstate)
             return Population(config, (population, species_set, generation))
