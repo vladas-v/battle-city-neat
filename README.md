@@ -28,7 +28,7 @@ At the moment the genomes are being trained with a screenshot to input method. T
 ## Changes:
 * Implemented the FCEUX <> Lua <-socket-> Python interface. Therefore:
   * Complete direct control over the emulation;
-  * The emulation is two/three times as fast as before;
+  * The emulation is two/three times faster than before;
   * No more dependency on screen capture, this means the neuron network receives 100% accurate data input of the game, the      location of objects and statuses. Also the emulation/neuroevolution can be left to run in the background without interruptions.
 * Changed the fitness function;
 * Changed the running output;
@@ -45,3 +45,15 @@ This would result in differently sized specieism and/or with smaller population 
 Higher mutation rates would over time speed up the growth of connections/neurons. The other possibility is to kickstart the neuron networks with more hidden neurons from the start.
 * Implement a plotting function, which can plot the species' stagnation and fitness levels. Also this could be sent with the status updates through email.
 * Implement a graphical view of the neurons firing on the game screen?
+
+
+# Update 07.09
+
+## Changes:
+* Added plotting functions to plot speciation bars and fitness graphs over generations:
+
+![Speciation](https://s8.postimg.cc/i5utfbeh1/plot.png)
+
+![Fitness_change_over_generations](https://s8.postimg.cc/lpgr549h1/fitplot.png)
+
+The plots are then sent to my email with updates after each generation.
